@@ -2,11 +2,19 @@ import POJO.OrderCreatePOJO;
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
 
+import java.util.HashMap;
+
 import static io.restassured.RestAssured.given;
 
 public class OrderCommonSteps extends RestAssuredSpecification {
 
     public static final String ORDER_PATH = "/api/v1/orders";
+
+    //Параметры для запроса списка доступных заказов
+    HashMap<String, String> params = new HashMap<String, String>() {{
+        put("limit", "10");
+        put("page", "0");
+    }};
 
 
 
@@ -29,11 +37,12 @@ public class OrderCommonSteps extends RestAssuredSpecification {
                 .put(ORDER_PATH + "/cancel?track=" + track);
     }
 
-    @Step("Получение списка доступных заказов(лимит 10).")
+    @Step("Получение списка доступных заказов.")
     public Response getAvailableOrders() {
         return given()
                 .spec(getBaseSpec())
+                .queryParams(params)
                 .when()
-                .get(ORDER_PATH +"?limit=10&page=0");
+                .get(ORDER_PATH);
     }
 }

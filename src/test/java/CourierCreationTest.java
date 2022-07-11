@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 
 public class CourierCreationTest {
     private CourierCommonSteps courierCommonSteps;
-    public long courierId;
+    public int courierId = 0;
     public final String login = RandomStringUtils.randomAlphabetic(10);
     public final String password = RandomStringUtils.randomAlphanumeric(10);
     public final String firstName = RandomStringUtils.randomAlphabetic(10);
@@ -25,16 +25,11 @@ public class CourierCreationTest {
     }
 
     @After
-    public void tearDown() throws NullPointerException {
-        try {
-            CourierPOJO courierPOJO = new CourierPOJO(login, password);
-            courierCommonSteps.login(courierPOJO);
-            courierId = courierCommonSteps.returnCourierId(courierPOJO);
-            if (courierId != 0) {
-                courierCommonSteps.delete(courierId);
-            }
-        } catch (NullPointerException nullPointerException) {
-        } //если курьер не найден, то и удалять ничего не нужно
+    public void tearDown() {
+        if (courierId != 0) {
+            courierCommonSteps.delete(courierId);
+        }
+        courierId = 0;
     }
 
     @Test
@@ -43,12 +38,14 @@ public class CourierCreationTest {
         // Подготовка среды
         CourierPOJO courierPOJO = new CourierPOJO(login, password, firstName);
         Response response = courierCommonSteps.create(courierPOJO);
+        Response createResponse = courierCommonSteps.login(courierPOJO);
+        courierId = createResponse.then().extract().path("id");
 
         // Проверки
         courierCommonSteps.compareStatusCode(response, 201); //проверка успешного создания курьера
         assertTrue("Курьер не создан", response.then().extract().path("ok")); // проверка создания курьера
         assertThat("ID курьера не может быть = 0",
-                response.then().extract().path("id"), is(not(0))); // в тело ответа возвращается id курьера, не равный "0"
+                courierId, is(not(0))); // в тело ответа возвращается id курьера, не равный "0"
     }
 
     @Test
@@ -57,7 +54,11 @@ public class CourierCreationTest {
         // Подготовка среды
         CourierPOJO courierPOJO = new CourierPOJO(login, password, firstName);
         courierCommonSteps.create(courierPOJO); // создание первого курьера
+        Response createResponse = courierCommonSteps.login(courierPOJO);
+        courierId = createResponse.then().extract().path("id");
+
         Response response = courierCommonSteps.create(courierPOJO); // создание второго курьера с повторяющимися данными
+
 
         //Проверки
         courierCommonSteps.compareStatusCode(response, 409); // проверка ошибки создания курьера

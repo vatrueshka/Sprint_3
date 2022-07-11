@@ -2,7 +2,8 @@ import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasSize;
 
 public class OrderListTest {
 
@@ -14,6 +15,6 @@ public class OrderListTest {
         Response response = orderCommonSteps.getAvailableOrders();
         response.then().assertThat().statusCode(200)
                 .and()
-                .body("orders", notNullValue()); // Проверка, что метод работает и в тело ответа возвращается список
+                .body("orders", hasSize(greaterThan(0))); // Проверка, что метод работает и в массив orders не пустой
     }
 }

@@ -12,7 +12,7 @@ import static org.hamcrest.Matchers.*;
 
 public class CourierAuthorizationTest {
     private CourierCommonSteps courierCommonSteps;
-    public long courierId;
+    public int courierId = 0;
     public final String login = RandomStringUtils.randomAlphabetic(10);
     public final String password = RandomStringUtils.randomAlphanumeric(10);
 
@@ -21,16 +21,11 @@ public class CourierAuthorizationTest {
     public void setUp() { courierCommonSteps = new CourierCommonSteps(); }
 
     @After
-    public void tearDown() throws NullPointerException {
-        try {
-            CourierPOJO courierPOJO = new CourierPOJO(login, password);
-            courierCommonSteps.login(courierPOJO);
-            courierId = courierCommonSteps.returnCourierId(courierPOJO);
+    public void tearDown() {
             if (courierId != 0) {
                 courierCommonSteps.delete(courierId);
             }
-        } catch (NullPointerException ignored) {
-        } // если курьер не был создан, то и удалить его не получится
+        courierId = 0;
     }
 
     @Test
@@ -43,9 +38,11 @@ public class CourierAuthorizationTest {
 
         //Проверки
         Response response = courierCommonSteps.login(courierPOJO);
+        courierId = response.then().extract().path("id");
+
         courierCommonSteps.compareStatusCode(response, 200); //проверка успешной авторизации
         assertThat("ID курьера не может быть = 0",
-                response.then().extract().path("id"),
+                courierId,
                 is(not(0))); // в тело ответа возвращается id курьера, не равный "0"
     }
 
@@ -55,23 +52,30 @@ public class CourierAuthorizationTest {
         // Подготовка среды
         CourierPOJO courierPOJO = new CourierPOJO(login, password);
         courierCommonSteps.create(courierPOJO);
+        Response createResponse = courierCommonSteps.login(courierPOJO);
+        courierId = createResponse.then().extract().path("id");
 
         //Проверки
         CourierPOJO courierOnlyPasswordPOJO = new CourierPOJO(password);
         Response response = courierCommonSteps.login(courierOnlyPasswordPOJO);
+
+
         courierCommonSteps.compareStatusCode(response, 400); //проверка ошибки авторизации
         assertThat("Сообщение об ошибке не отображается",
                 response.then().extract().path("message"),
                 is("Недостаточно данных для входа")); // проверка отображения ошибки и её текста
     }
 
-    @Test //тест падает по таймауту
+    @Test (timeout = 20000) //установлен таймаут, чтобы не дожидаться ошибки метода
     @DisplayName("Проверка авторизации под курьером без пароля")
     @Description("Тест с попыткой авторизации без пароля будет падать с ошибкой по таймауту, проблема в запросе или в документации")
     public void courierAuthorizationWithoutPassword() {
         // Подготовка среды
         CourierPOJO courierPOJO = new CourierPOJO(login, password);
         courierCommonSteps.create(courierPOJO);
+        Response createResponse = courierCommonSteps.login(courierPOJO);
+        courierId = createResponse.then().extract().path("id");
+
 
         //Проверки
         String bodyWithoutPassword = "{\"login\":\"" + login + "\"}";
