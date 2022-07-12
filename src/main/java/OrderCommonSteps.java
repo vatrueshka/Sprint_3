@@ -32,9 +32,9 @@ public class OrderCommonSteps extends RestAssuredSpecification {
     public Response deleteOrder(int track) {
         return given()
                 .spec(getBaseSpec())
-                .and()
+                .queryParams("track", track)
                 .when()
-                .put(ORDER_PATH + "/cancel?track=" + track);
+                .put(ORDER_PATH + "/cancel");
     }
 
     @Step("Получение списка доступных заказов.")
