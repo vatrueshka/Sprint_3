@@ -1,4 +1,5 @@
 import POJO.OrderCreatePOJO;
+import com.github.javafaker.Faker;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.Before;
@@ -7,26 +8,29 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.List;
+import java.util.Locale;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 
-
 @RunWith(Parameterized.class)
 public class OrderCreationTest {
+    Faker faker = new Faker(new Locale("ru"));
+
     private OrderCommonSteps orderCommonSteps;
     private final OrderCreatePOJO orderCreatePOJO;
 
+    private final String firstName = faker.name().firstName();
+    private final String lastName = faker.name().lastName();
+    private final String address = faker.address().streetAddress();
+    private final Integer metroStation = faker.number().numberBetween(1, 100);
+    private final String phone = faker.phoneNumber().phoneNumber();
+    private final Integer rentTime = faker.number().numberBetween(1, 8);
+    private final String deliveryDate = faker.backToTheFuture().date();
+    private final String comment = faker.company().catchPhrase();
+
     public OrderCreationTest(
-            String firstName,
-            String lastName,
-            String address,
-            Integer metroStation,
-            String phone,
-            Integer rentTime,
-            String deliveryDate,
-            String comment,
             List<String> color
     ) {
         this.orderCreatePOJO = new OrderCreatePOJO(
@@ -43,59 +47,12 @@ public class OrderCreationTest {
     }
 
     @Parameterized.Parameters
-    public static Object[][] getOrderData() {
+    public static Object[][] getColor() {
         return new Object[][]{
-                {
-                        "Naruto",
-                        "Uchiha",
-                        "Konoha, 142 apt.",
-                        4,
-                        "+7 800 355 35 35",
-                        5,
-                        "2022-09-09",
-                        "Saske, come back to Konoha",
-                        List.of(
-                                "BLACK",
-                                "GREY"
-                        )
-                },
-                {
-                        "Naruto",
-                        "Uchiha",
-                        "Konoha, 142 apt.",
-                        4,
-                        "+7 800 355 35 35",
-                        5,
-                        "2022-09-09",
-                        "Saske, come back to Konoha",
-                        List.of(
-                                "BLACK"
-                        )
-                },
-                {
-                        "Naruto",
-                        "Uchiha",
-                        "Konoha, 142 apt.",
-                        4,
-                        "+7 800 355 35 35",
-                        5,
-                        "2022-09-09",
-                        "Saske, come back to Konoha",
-                        List.of(
-                                "GREY"
-                        )
-                },
-                {
-                        "Naruto",
-                        "Uchiha",
-                        "Konoha, 142 apt.",
-                        4,
-                        "+7 800 355 35 35",
-                        5,
-                        "2022-09-09",
-                        "Saske, come back to Konoha",
-                        null
-                }
+                {List.of("BLACK", "GREY")},
+                {List.of("BLACK")},
+                {List.of("BLACK")},
+                {null}
         };
     }
 
