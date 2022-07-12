@@ -1,4 +1,5 @@
 import POJO.CourierPOJO;
+import POJO.CourierWithoutPasswordPOJO;
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
 
@@ -18,6 +19,16 @@ public class CourierCommonSteps extends RestAssuredSpecification {
                 .post(COURIER_PATH);
     }
 
+    @Step("Создание курьера для проверки авторизации без пароля")
+    public static Response create(CourierWithoutPasswordPOJO courierAuthorizationCreds) {
+        return given()
+                .spec(getBaseSpec())
+                .and()
+                .body(courierAuthorizationCreds)
+                .when()
+                .post(COURIER_PATH);
+    }
+
     @Step("Авторизация под курьером")
     public Response login(CourierPOJO courierLoginCreds) {
         return given()
@@ -29,11 +40,11 @@ public class CourierCommonSteps extends RestAssuredSpecification {
     }
 
     @Step("Авторизация под курьером без пароля")
-    public Response loginWithoutPassword(String bodyWithoutPassword) {
+    public Response loginWithoutPassword(CourierWithoutPasswordPOJO courierAuthorizationCreds) {
         return given()
                 .spec(getBaseSpec())
                 .and()
-                .body(bodyWithoutPassword)
+                .body(courierAuthorizationCreds)
                 .when()
                 .post(COURIER_PATH + "login");
     }
@@ -53,7 +64,7 @@ public class CourierCommonSteps extends RestAssuredSpecification {
     }
 
     @Step("Получение id курьера после авторизации.")
-    public int returnCourierId (CourierPOJO courierIdPOJO) {
+    public int returnCourierId(CourierPOJO courierIdPOJO) {
         return given()
                 .spec(getBaseSpec())
                 .body(courierIdPOJO)

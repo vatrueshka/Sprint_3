@@ -18,13 +18,15 @@ public class CourierAuthorizationTest {
 
 
     @Before
-    public void setUp() { courierCommonSteps = new CourierCommonSteps(); }
+    public void setUp() {
+        courierCommonSteps = new CourierCommonSteps();
+    }
 
     @After
     public void tearDown() {
-            if (courierId != 0) {
-                courierCommonSteps.delete(courierId);
-            }
+        if (courierId != 0) {
+            courierCommonSteps.delete(courierId);
+        }
         courierId = 0;
     }
 
@@ -66,20 +68,21 @@ public class CourierAuthorizationTest {
                 is("Недостаточно данных для входа")); // проверка отображения ошибки и её текста
     }
 
-    @Test (timeout = 20000) //установлен таймаут, чтобы не дожидаться ошибки метода
+    @Test(timeout = 20000) //установлен таймаут, чтобы не дожидаться ошибки метода
     @DisplayName("Проверка авторизации под курьером без пароля")
     @Description("Тест с попыткой авторизации без пароля будет падать с ошибкой по таймауту, проблема в запросе или в документации")
     public void courierAuthorizationWithoutPassword() {
         // Подготовка среды
-        CourierPOJO courierPOJO = new CourierPOJO(login, password);
+        CourierWithoutPasswordPOJO courierPOJO = new CourierWithoutPasswordPOJO(login, password);
         courierCommonSteps.create(courierPOJO);
-        Response createResponse = courierCommonSteps.login(courierPOJO);
+        Response createResponse = courierCommonSteps.loginWithoutPassword(courierPOJO);
         courierId = createResponse.then().extract().path("id");
 
 
         //Проверки
-        String bodyWithoutPassword = "{\"login\":\"" + login + "\"}";
-        Response response = courierCommonSteps.loginWithoutPassword(bodyWithoutPassword);
+        CourierWithoutPasswordPOJO courierWithoutPasswordPOJO = new CourierWithoutPasswordPOJO(login);
+        Response response = courierCommonSteps.loginWithoutPassword(courierWithoutPasswordPOJO);
+
         courierCommonSteps.compareStatusCode(response, 400); //проверка ошибки авторизации
         assertThat("Сообщение об ошибке не отображается",
                 response.then().extract().path("message"),
